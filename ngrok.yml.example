@@ -1,0 +1,22 @@
+# ngrok configuration for Mob Rule Example App
+# 
+# Usage: 
+# 1. Copy this file to ngrok.yml
+# 2. Add your ngrok authtoken (get it from https://dashboard.ngrok.com/get-started/your-authtoken)
+# 3. Run: ngrok start --all --config=ngrok.yml
+
+version: "2"
+authtoken: YOUR_NGROK_AUTHTOKEN_HERE
+
+tunnels:
+  # Next.js application on port 3000
+  app:
+    proto: http
+    addr: 3000
+    inspect: true
+    
+  # API or additional service on port 3001  
+  api:
+    proto: http
+    addr: 3001
+    inspect: true
