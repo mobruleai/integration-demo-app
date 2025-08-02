@@ -14,6 +14,18 @@ export default function CompletedPage() {
     const checkCompletion = async () => {
       try {
         const response = await fetch('/api/webhook');
+        
+        if (!response.ok) {
+          console.error('Failed to check completion status:', response.status);
+          return;
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('Unexpected response type:', contentType);
+          return;
+        }
+        
         const data = await response.json();
         
         if (data.completed && data.responseData) {

@@ -35,22 +35,21 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
       }
     }
-    
-    // Log the webhook event
-    console.log('Webhook received:', {
-      event: body.event,
-      uuid: body.uuid,
-      timestamp: new Date().toISOString()
-    });
 
     // Handle different webhook events
     switch (body.event) {
       case 'interview_session.started':
-        console.log('Interview session started:', body.uuid);
+        // Interview started - no action needed for now
         break;
         
       case 'interview_session.completed':
-        console.log('Interview session completed:', body.uuid);
+        // Extract the response UUID from the nested data structure
+        const responseUuid = body.data?.response_uuid;
+        
+        if (!responseUuid) {
+          console.error('No response UUID found in webhook body');
+          return NextResponse.json({ received: true });
+        }
         
         // Fetch the response data using the responses API
         const apiKey = process.env.MOBRULE_API_KEY;
@@ -60,7 +59,7 @@ export async function POST(request: Request) {
         }
 
         try {
-          const responseData = await fetchResponseData(body.uuid, apiKey);
+          const responseData = await fetchResponseData(responseUuid, apiKey);
           completedSessionData = responseData;
         } catch (error) {
           console.error('Failed to fetch response data:', error);
@@ -68,7 +67,7 @@ export async function POST(request: Request) {
         break;
         
       default:
-        console.log('Unknown event:', body.event);
+        // Unknown event type - ignore
     }
 
     // Always return 200 OK for webhook endpoints

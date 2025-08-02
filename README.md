@@ -46,6 +46,7 @@ This Next.js application demonstrates how to integrate Mob Rule's interview plat
    ```
 
    If you're using a development API with self-signed certificates:
+
    ```bash
    npm run dev:insecure
    # or manually: NODE_TLS_REJECT_UNAUTHORIZED=0 npm run dev
@@ -58,7 +59,7 @@ This Next.js application demonstrates how to integrate Mob Rule's interview plat
    ```bash
    # For a single tunnel:
    ngrok http 3000
-   
+
    # For multiple tunnels (if you have services on both 3000 and 3001):
    # First, add your authtoken to ngrok.yml
    # Then run:
@@ -133,13 +134,13 @@ GET https://mobrule.ai/api/v1/responses/{uuid}
 
 ## Environment Variables
 
-| Variable                 | Description                               | Example                    |
-| ------------------------ | ----------------------------------------- | -------------------------- |
-| `MOBRULE_API_BASE_URL`   | Base URL for Mob Rule API                 | `https://mobrule.ai`       |
-| `MOBRULE_API_KEY`        | Your Mob Rule API key                     | `mob_live_abc123...`       |
-| `MOBRULE_EMAIL`          | Email for pre-authentication              | `user@example.com`         |
-| `MOBRULE_INTERVIEW_UUID` | UUID of the interview to embed            | `550e8400-e29b...`         |
-| `MOBRULE_WEBHOOK_SECRET` | Secret for webhook signature verification | `iuhdeiuhediuhe`           |
+| Variable                 | Description                               | Example              |
+| ------------------------ | ----------------------------------------- | -------------------- |
+| `MOBRULE_API_BASE_URL`   | Base URL for Mob Rule API                 | `https://mobrule.ai` |
+| `MOBRULE_API_KEY`        | Your Mob Rule API key                     | `mob_live_abc123...` |
+| `MOBRULE_EMAIL`          | Email for pre-authentication              | `user@example.com`   |
+| `MOBRULE_INTERVIEW_UUID` | UUID of the interview to embed            | `550e8400-e29b...`   |
+| `MOBRULE_WEBHOOK_SECRET` | Secret for webhook signature verification | `iuhdeiuhediuhe`     |
 
 ## Development Tips
 

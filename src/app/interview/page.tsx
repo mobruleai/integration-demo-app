@@ -1,15 +1,12 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Loader2, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 export default function InterviewPage() {
   const [verificationUrl, setVerificationUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [interviewWindow, setInterviewWindow] = useState<Window | null>(null);
-  const [interviewStarted, setInterviewStarted] = useState(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch pre-auth URL
@@ -26,6 +23,8 @@ export default function InterviewPage() {
         }
 
         const data = await response.json();
+        console.log('Pre-auth response:', data);
+        console.log('Verification URL:', data.verificationUrl);
         setVerificationUrl(data.verificationUrl);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -39,26 +38,27 @@ export default function InterviewPage() {
 
   // Check for completion in the background
   useEffect(() => {
-    if (!interviewStarted) return;
+    if (!verificationUrl) return;
 
     const checkCompletion = async () => {
       try {
-        // Check if the interview window is closed
-        if (interviewWindow && interviewWindow.closed) {
-          console.log('Interview window was closed');
-          window.location.href = '/completed';
+        const response = await fetch('/api/webhook');
+        
+        if (!response.ok) {
+          console.error('Failed to check completion status:', response.status);
           return;
         }
-
-        // Also check webhook for completion
-        const response = await fetch('/api/webhook');
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('Unexpected response type:', contentType);
+          return;
+        }
+        
         const data = await response.json();
         
         if (data.completed) {
           console.log('Interview completed via webhook');
-          if (interviewWindow && !interviewWindow.closed) {
-            interviewWindow.close();
-          }
           window.location.href = '/completed';
         }
       } catch (error) {
@@ -79,28 +79,8 @@ export default function InterviewPage() {
         clearInterval(checkIntervalRef.current);
       }
     };
-  }, [interviewStarted, interviewWindow]);
+  }, [verificationUrl]);
 
-  const startInterview = () => {
-    if (verificationUrl) {
-      console.log('Opening interview in new window:', verificationUrl);
-      const newWindow = window.open(
-        verificationUrl,
-        'mobrule-interview',
-        'width=1200,height=800,scrollbars=yes,resizable=yes'
-      );
-      
-      if (newWindow) {
-        setInterviewWindow(newWindow);
-        setInterviewStarted(true);
-        
-        // Focus the new window
-        newWindow.focus();
-      } else {
-        setError('Popup blocked. Please allow popups for this site and try again.');
-      }
-    }
-  };
 
   if (loading) {
     return (
@@ -132,56 +112,26 @@ export default function InterviewPage() {
     );
   }
 
-  if (interviewStarted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="mb-6">
-            <ExternalLink className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-bold mb-2">Interview Started</h2>
-            <p className="text-muted-foreground mb-4">
-              Your interview is running in a separate window. Please complete the interview there.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              This page will automatically redirect when the interview is completed.
-            </p>
-          </div>
-          
-          <div className="space-y-3">
-            <Button 
-              onClick={() => interviewWindow?.focus()} 
-              variant="outline"
-              disabled={!interviewWindow || interviewWindow.closed}
-            >
-              Focus Interview Window
-            </Button>
-            
-            <Button 
-              onClick={() => window.location.href = '/completed'} 
-              variant="ghost"
-              size="sm"
-            >
-              Skip to Results
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  console.log('About to load iframe with URL:', verificationUrl);
+  
+  // Extract the origin from the verification URL
+  const urlObj = new URL(verificationUrl);
+  const iframeOrigin = urlObj.origin;
+  console.log('Iframe origin:', iframeOrigin);
+  
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Ready to Start Your Interview</h2>
-        <p className="text-muted-foreground mb-6">
-          Your interview will open in a new window. Make sure your browser allows popups from this site.
-        </p>
-        
-        <Button onClick={startInterview} size="lg" className="gap-2">
-          Start Interview
-          <ExternalLink className="h-4 w-4" />
-        </Button>
-      </div>
+    <div className="fixed inset-0 bg-background">
+      <iframe
+        src={verificationUrl}
+        className="w-full h-full border-0"
+        title="Mob Rule Interview"
+        allow="camera; microphone; fullscreen; clipboard-read; clipboard-write"
+        referrerPolicy="origin"
+        onLoad={() => {
+          console.log('Iframe loaded successfully');
+        }}
+        onError={(e) => console.error('Iframe load error:', e)}
+      />
     </div>
   );
 }
