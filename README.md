@@ -86,7 +86,7 @@ This Next.js application demonstrates how to integrate Mob Rule's interview plat
 2. **Interview Page (`/interview`)**:
 
    - Calls the pre-authentication API to get a verified URL
-   - Opens the Mob Rule interview in a new window/tab
+   - Opens the interview page with the interview embedded in an iframe
    - Monitors both window closure and webhook status for completion
    - Auto-redirects to completion page when finished
 
