@@ -136,7 +136,7 @@ GET https://app.mobrule.ai/api/v1/responses/{uuid}
 
 | Variable                 | Description                               | Example              |
 | ------------------------ | ----------------------------------------- | -------------------- |
-| `MOBRULE_API_BASE_URL`   | Base URL for Mob Rule API                 | `https://mobrule.ai` |
+| `MOBRULE_API_BASE_URL`   | Base URL for Mob Rule API                 | `https://app.mobrule.ai` |
 | `MOBRULE_API_KEY`        | Your Mob Rule API key                     | `mob_live_abc123...` |
 | `MOBRULE_EMAIL`          | Email for pre-authentication              | `user@example.com`   |
 | `MOBRULE_INTERVIEW_UUID` | UUID of the interview to embed            | `550e8400-e29b...`   |
