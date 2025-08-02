@@ -32,7 +32,7 @@ This Next.js application demonstrates how to integrate Mob Rule's interview plat
    Copy `.env.local.example` to `.env.local` (or create `.env.local`) and add:
 
    ```env
-   MOBRULE_API_BASE_URL=https://mobrule.ai
+   MOBRULE_API_BASE_URL=https://app.mobrule.ai
    MOBRULE_API_KEY=your_api_key_here
    MOBRULE_EMAIL=your_email@example.com
    MOBRULE_INTERVIEW_UUID=your_interview_uuid_here
@@ -106,7 +106,7 @@ When a user clicks "Start my interview", the app:
 4. Returns a verification URL that bypasses email entry
 
 ```javascript
-POST https://mobrule.ai/api/v1/interview-sessions/{uuid}/pre-authenticate
+POST https://app.mobrule.ai/api/v1/interview-sessions/{uuid}/pre-authenticate
 Body: { "emails": ["user@example.com"] }
 ```
 
@@ -122,7 +122,7 @@ All webhook requests are verified using HMAC-SHA256 signatures to ensure they're
 When the completed event is received, the webhook endpoint automatically fetches the full response data:
 
 ```javascript
-GET https://mobrule.ai/api/v1/responses/{uuid}
+GET https://app.mobrule.ai/api/v1/responses/{uuid}
 ```
 
 ### Technical Architecture
@@ -213,4 +213,4 @@ For issues with:
 
 - This demo app: Open an issue in this repository
 - Mob Rule API: Contact support@mobrule.ai
-- API Documentation: Visit [app.mobrule.ai/developers](https://app.mobrule.ai/developers)
+- API Documentation: Visit [app.mobrule.ai/developers/api-docs](https://app.mobrule.ai/developers/api-docs)
