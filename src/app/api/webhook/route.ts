@@ -11,7 +11,7 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
     .update(payload)
     .digest('hex');
 
-  return signature === `sha256=${expectedSignature}`;
+  return signature === expectedSignature;
 }
 
 export async function POST(request: Request) {
