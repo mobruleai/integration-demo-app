@@ -10,40 +10,51 @@ export default function CompletedPage() {
   const router = useRouter();
 
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
     // Poll for completion status
     const checkCompletion = async () => {
       try {
         const response = await fetch('/api/webhook');
-        
+
         if (!response.ok) {
           console.error('Failed to check completion status:', response.status);
           return;
         }
-        
+
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
           console.error('Unexpected response type:', contentType);
           return;
         }
-        
+
         const data = await response.json();
-        
+
         if (data.completed && data.responseData) {
           setResponseData(data.responseData);
           setLoading(false);
+          // Stop polling once we have the data
+          if (interval) {
+            clearInterval(interval);
+            interval = null;
+          }
+        } else if (!interval) {
+          // Only start polling if we don't have data yet and haven't started polling
+          interval = setInterval(checkCompletion, 2000);
         }
       } catch (error) {
         console.error('Error checking completion:', error);
       }
     };
 
-    // Check immediately
+    // Check immediately - if data is there, we're done. If not, polling will start.
     checkCompletion();
 
-    // Then poll every 2 seconds
-    const interval = setInterval(checkCompletion, 2000);
-
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, []);
 
   if (loading) {

@@ -10,7 +10,7 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
   const expectedSignature = createHmac('sha256', secret)
     .update(payload)
     .digest('hex');
-  
+
   return signature === `sha256=${expectedSignature}`;
 }
 
@@ -19,17 +19,17 @@ export async function POST(request: Request) {
     // Get the raw body for signature verification
     const rawBody = await request.text();
     const body = JSON.parse(rawBody);
-    
+
     // Verify webhook signature if secret is configured
     const webhookSecret = process.env.MOBRULE_WEBHOOK_SECRET;
     if (webhookSecret) {
       const signature = request.headers.get('x-mobrule-signature');
-      
+
       if (!signature) {
         console.error('Missing webhook signature');
         return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
       }
-      
+
       if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
         console.error('Invalid webhook signature');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
@@ -41,16 +41,16 @@ export async function POST(request: Request) {
       case 'interview_session.started':
         // Interview started - no action needed for now
         break;
-        
+
       case 'interview_session.completed':
         // Extract the response UUID from the nested data structure
         const responseUuid = body.data?.response_uuid;
-        
+
         if (!responseUuid) {
           console.error('No response UUID found in webhook body');
           return NextResponse.json({ received: true });
         }
-        
+
         // Fetch the response data using the responses API
         const apiKey = process.env.MOBRULE_API_KEY;
         if (!apiKey) {
@@ -65,9 +65,9 @@ export async function POST(request: Request) {
           console.error('Failed to fetch response data:', error);
         }
         break;
-        
+
       default:
-        // Unknown event type - ignore
+      // Unknown event type - ignore
     }
 
     // Always return 200 OK for webhook endpoints
@@ -103,11 +103,11 @@ async function fetchResponseData(uuid: string, apiKey: string) {
 // GET endpoint to retrieve the completed session data
 export async function GET(request: Request) {
   if (completedSessionData) {
-    return NextResponse.json({ 
-      completed: true, 
-      responseData: completedSessionData 
+    return NextResponse.json({
+      completed: true,
+      responseData: completedSessionData
     });
   }
-  
+
   return NextResponse.json({ completed: false });
 }

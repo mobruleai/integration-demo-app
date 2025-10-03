@@ -8,9 +8,14 @@ export default function InterviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const fetchedRef = useRef(false);
 
   // Fetch pre-auth URL
   useEffect(() => {
+    // Prevent double fetch in React Strict Mode
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
     const fetchPreAuthUrl = async () => {
       try {
         const response = await fetch('/api/pre-authenticate', {
@@ -36,48 +41,26 @@ export default function InterviewPage() {
     fetchPreAuthUrl();
   }, []);
 
-  // Check for completion in the background
+  // Listen for completion message from iframe
   useEffect(() => {
     if (!verificationUrl) return;
 
-    const checkCompletion = async () => {
-      try {
-        const response = await fetch('/api/webhook');
-        
-        if (!response.ok) {
-          console.error('Failed to check completion status:', response.status);
-          return;
-        }
-        
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.error('Unexpected response type:', contentType);
-          return;
-        }
-        
-        const data = await response.json();
-        
-        if (data.completed) {
-          console.log('Interview completed via webhook');
-          window.location.href = '/completed';
-        }
-      } catch (error) {
-        console.error('Error checking completion:', error);
+    const handleMessage = (event: MessageEvent) => {
+      // Verify the origin matches the iframe URL
+      const urlObj = new URL(verificationUrl);
+      if (event.origin !== urlObj.origin) return;
+
+      // Check for completion event
+      if (event.data?.type === 'interview_completed' || event.data?.completed) {
+        console.log('Interview completed via postMessage');
+        window.location.href = '/completed';
       }
     };
 
-    // Start checking after 5 seconds
-    const timeout = setTimeout(() => {
-      checkCompletion();
-      // Then check every 3 seconds
-      checkIntervalRef.current = setInterval(checkCompletion, 3000);
-    }, 5000);
+    window.addEventListener('message', handleMessage);
 
     return () => {
-      clearTimeout(timeout);
-      if (checkIntervalRef.current) {
-        clearInterval(checkIntervalRef.current);
-      }
+      window.removeEventListener('message', handleMessage);
     };
   }, [verificationUrl]);
 
